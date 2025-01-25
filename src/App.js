@@ -33,7 +33,7 @@ function App() {
   const [startTime, setStartTime] = useState(null);
   const [gameOver, setGameOver] = useState(false);
 
-  // Shuffle the array of cards
+
   const shuffleArray = (array) => {
     for (let i = array.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -42,7 +42,6 @@ function App() {
     return array;
   };
 
-  // Initialize the game when the game mode changes
   useEffect(() => {
     const pairs = cardImages.slice(0, gameMode / 2).flatMap((card, index) => [
       { ...card, id: index * 2 },
@@ -56,14 +55,13 @@ function App() {
     setGameOver(false);
   }, [gameMode]);
 
-  // Handle card clicks
   const handleClick = (card) => {
     if (flippedCards.length < 2 && !flippedCards.includes(card) && !matchedCards.includes(card)) {
       setFlippedCards([...flippedCards, card]);
     }
   };
 
-  // Check for matches when two cards are flipped
+  //check when two cards are flipped
   useEffect(() => {
     if (flippedCards.length === 2) {
       setDisabled(true);
@@ -136,7 +134,6 @@ function App() {
               setDisabled(false);
               setGameOver(false);
 
-              // Reinitialize the cards
               const pairs = cardImages.slice(0, gameMode / 2).flatMap((card, index) => [
                 { ...card, id: index * 2 },
                 { ...card, id: index * 2 + 1 },
