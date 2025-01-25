@@ -15,7 +15,7 @@ const Menu = ({ setGameMode, setBackground, history }) => {
           <h3>Settings</h3>
           <label>
             Mode de jeu :
-            <select onChange={(e) => setGameMode(Number(e.target.value))}>
+            <select defaultValue={16} onChange={(e) => setGameMode(Number(e.target.value))}>
               <option value={4}>4 Cartes</option>
               <option value={16}>16 Cartes</option>
               <option value={32}>32 Cartes</option>

@@ -4,22 +4,22 @@ import Menu from './components/Menu';
 import './App.css';
 
 const cardImages = [
-  { name: 'A', image: 'https://via.placeholder.com/100' },
-  { name: 'B', image: 'https://via.placeholder.com/100' },
-  { name: 'C', image: 'https://via.placeholder.com/100' },
-  { name: 'D', image: 'https://via.placeholder.com/100' },
-  { name: 'E', image: 'https://via.placeholder.com/100' },
-  { name: 'F', image: 'https://via.placeholder.com/100' },
-  { name: 'G', image: 'https://via.placeholder.com/100' },
-  { name: 'H', image: 'https://via.placeholder.com/100' },
-  { name: 'I', image: 'https://via.placeholder.com/100' },
-  { name: 'J', image: 'https://via.placeholder.com/100' },
-  { name: 'K', image: 'https://via.placeholder.com/100' },
-  { name: 'L', image: 'https://via.placeholder.com/100' },
-  { name: 'M', image: 'https://via.placeholder.com/100' },
-  { name: 'N', image: 'https://via.placeholder.com/100' },
-  { name: 'O', image: 'https://via.placeholder.com/100' },
-  { name: 'P', image: 'https://via.placeholder.com/100' },
+  { name: 'A', image: '/images/a.jpg' },
+  { name: 'B', image: '/images/b.jpg' },
+  { name: 'D', image: '/images/d.jpg' },
+  { name: 'C', image: '/images/c.jpg' },
+  { name: 'E', image: '/images/e.jpg' },
+  { name: 'F', image: '/images/f.jpg' },
+  { name: 'G', image: '/images/g.jpg' },
+  { name: 'H', image: '/images/h.jpg' },
+  { name: 'I', image: '/images/i.jpg' },
+  { name: 'J', image: '/images/j.jpg' },
+  { name: 'K', image: '/images/k.jpg' },
+  { name: 'L', image: '/images/l.jpg' },
+  { name: 'M', image: '/images/m.jpg' },
+  { name: 'N', image: '/images/n.jpg' },
+  { name: 'O', image: '/images/o.jpg' },
+  { name: 'P', image: '/images/p.jpg' },
 ];
 
 function App() {
@@ -27,14 +27,13 @@ function App() {
   const [flippedCards, setFlippedCards] = useState([]);
   const [matchedCards, setMatchedCards] = useState([]);
   const [disabled, setDisabled] = useState(false);
-  const [gameMode, setGameMode] = useState(16); // Default game mode
+  const [gameMode, setGameMode] = useState(16);
   const [background, setBackground] = useState('#ffffff');
   const [history, setHistory] = useState([]);
   const [startTime, setStartTime] = useState(null);
-  const [endTime, setEndTime] = useState(null);
   const [gameOver, setGameOver] = useState(false);
 
-  // Shuffle array using Fisher-Yates algorithm
+  // Shuffle the array of cards
   const shuffleArray = (array) => {
     for (let i = array.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -43,7 +42,7 @@ function App() {
     return array;
   };
 
-  // Initialize the game based on the selected game mode
+  // Initialize the game when the game mode changes
   useEffect(() => {
     const pairs = cardImages.slice(0, gameMode / 2).flatMap((card, index) => [
       { ...card, id: index * 2 },
@@ -57,14 +56,14 @@ function App() {
     setGameOver(false);
   }, [gameMode]);
 
-  // Handle card click
+  // Handle card clicks
   const handleClick = (card) => {
     if (flippedCards.length < 2 && !flippedCards.includes(card) && !matchedCards.includes(card)) {
       setFlippedCards([...flippedCards, card]);
     }
   };
 
-  // Check for matches
+  // Check for matches when two cards are flipped
   useEffect(() => {
     if (flippedCards.length === 2) {
       setDisabled(true);
@@ -76,27 +75,35 @@ function App() {
         setTimeout(resetTurn, 1000);
       }
     }
-  }, [flippedCards]);
+  }, [flippedCards, matchedCards]);
 
-  // Reset flipped cards
   const resetTurn = () => {
     setFlippedCards([]);
     setDisabled(false);
   };
 
-  // Check if the game is over
-  useEffect(() => {
+  // Save game result to history
+  const saveToHistory = React.useCallback((result) => {
+    setHistory((prevHistory) => [...prevHistory, result]);
+  }, []);
+
+  //check game over and log history
+    useEffect(() => {
     if (matchedCards.length === gameMode && !gameOver) {
-      setEndTime(Date.now());
+      const endTime = Date.now();
+      const timeTaken = Math.floor((endTime - startTime) / 1000); // Time in seconds
+
+      // Save the game result to history
+      saveToHistory({
+        score: gameMode / 2,
+        timeTaken,
+        date: new Date().toLocaleString(),
+      });
+
+      // Mark the game as over
       setGameOver(true);
-      const timeTaken = Math.floor((Date.now() - startTime) / 1000);
-      const score = gameMode / 2;
-      const gameHistory = JSON.parse(localStorage.getItem('gameHistory')) || [];
-      gameHistory.push({ score, timeTaken, date: new Date().toLocaleString() });
-      localStorage.setItem('gameHistory', JSON.stringify(gameHistory));
-      setHistory(gameHistory);
     }
-  }, [matchedCards, gameMode, gameOver, startTime]);
+  }, [matchedCards, gameMode, gameOver, startTime, saveToHistory]);
 
   return (
     <div className="App" style={{ backgroundColor: background }}>
@@ -122,11 +129,14 @@ function App() {
           <h2>Congratulations! You've matched all the cards!</h2>
           <button
             onClick={() => {
+              // Reset the game
               setCards([]);
               setFlippedCards([]);
               setMatchedCards([]);
               setDisabled(false);
               setGameOver(false);
+
+              // Reinitialize the cards
               const pairs = cardImages.slice(0, gameMode / 2).flatMap((card, index) => [
                 { ...card, id: index * 2 },
                 { ...card, id: index * 2 + 1 },
